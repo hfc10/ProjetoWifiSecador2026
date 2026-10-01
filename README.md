@@ -204,7 +204,7 @@ No automático o ESP decide e sobrescreve os coils 0–3 (escrita do mestre é i
 eles comandam as saídas.
 
 O painel que lê esses registradores (Python + Flask, com gráficos, eventos e modo quiosque para
-tela de IHM) fica num repositório separado.
+tela de IHM) fica em [hfc10/Software_modbus](https://github.com/hfc10/Software_modbus).
 
 ---
 

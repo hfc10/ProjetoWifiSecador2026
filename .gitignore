@@ -1,0 +1,11 @@
+.pio
+
+# Configuracoes do VS Code geradas pra esta maquina (caminhos locais); so a lista de extensoes vai pro Git
+.vscode/*
+!.vscode/extensions.json
+
+# Senhas de WiFi (modelo sem as senhas: include/credenciais_exemplo.h)
+include/credenciais.h
+
+# Logs do monitor serial (monitor_filters = log2file)
+logs/

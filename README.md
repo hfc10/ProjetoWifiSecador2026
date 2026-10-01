@@ -1,0 +1,1 @@
+# ProjetoWifiSecador2026

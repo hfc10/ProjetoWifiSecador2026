@@ -1322,6 +1322,44 @@ void inicializarWatchdog() {
 // Setup e loop
 // ============================================================================
 
+const char* nomeSegurancaWifi(wifi_auth_mode_t modo) {
+  switch (modo) {
+    case WIFI_AUTH_OPEN: return "aberta";
+    case WIFI_AUTH_WPA_PSK: return "WPA";
+    case WIFI_AUTH_WPA2_PSK: return "WPA2";
+    case WIFI_AUTH_WPA_WPA2_PSK: return "WPA/WPA2";
+    case WIFI_AUTH_WPA3_PSK: return "WPA3";
+    case WIFI_AUTH_WPA2_WPA3_PSK: return "WPA2/WPA3";
+    default: return "outra";
+  }
+}
+
+// Quando nao conecta: diz o motivo (rede nao encontrada x senha recusada) e lista as redes que o
+// ESP enxerga. Rede ausente da lista = desligada ou em 5 GHz (o ESP32-S3 so ve 2,4 GHz).
+void diagnosticarFalhaWifi() {
+  wl_status_t status = WiFi.status();
+  if (status == WL_NO_SSID_AVAIL) {
+    Serial.println("Motivo: rede NAO encontrada (desligada, nome diferente ou em 5 GHz)");
+    lcdLinha(2, "Rede nao encontrada");
+  } else if (status == WL_CONNECT_FAILED) {
+    Serial.println("Motivo: rede encontrada, mas a conexao foi RECUSADA (senha ou tipo de seguranca)");
+    lcdLinha(2, "Senha recusada?");
+  } else {
+    Serial.printf("Motivo: sem resposta a tempo (status %d)\n", status);
+    lcdLinha(2, "Confira SSID/senha");
+  }
+
+  Serial.println("Redes que o ESP enxerga (nome | sinal | canal | seguranca):");
+  int total = WiFi.scanNetworks();
+  for (int i = 0; i < total; i++) {
+    Serial.printf("  %s | %d dBm | canal %d | %s%s\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i),
+                  WiFi.channel(i), nomeSegurancaWifi(WiFi.encryptionType(i)),
+                  WiFi.SSID(i) == SSID_HOTSPOT ? "   <-- a rede configurada" : "");
+  }
+  if (total <= 0) Serial.println("  (nenhuma rede encontrada)");
+  WiFi.scanDelete();
+}
+
 void setup() {
   ultimaMudancaEstagioMs[0] = millis();
   ultimaMudancaEstagioMs[1] = millis();
@@ -1396,7 +1434,7 @@ void setup() {
   } else {
     Serial.println("\nFalha ao conectar - confira SSID/senha e se o hotspot esta ligado");
     lcdLinha(1, "Falha ao conectar");
-    lcdLinha(2, "Confira SSID/senha");
+    diagnosticarFalhaWifi();
   }
 }
 
